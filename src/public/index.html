@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Assets</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23b6401e'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #efe8dc;
+      --card: #fbf8f3;
+      --ink: #1c1712;
+      --muted: #6f655c;
+      --line: #d9d0c3;
+      --stamp: #b6401e;
+      --stamp-ink: #fff7f2;
+      --ok: #1f6b45;
+      --danger: #9d1c2b;
+      --shadow: 0 16px 40px rgba(48, 32, 18, 0.06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(182, 64, 30, 0.08), transparent 28rem),
+        var(--paper);
+      color: var(--ink);
+      font: 16px/1.5 "Segoe UI", Candara, sans-serif;
+    }
+    main { max-width: 1040px; margin: 0 auto; padding: 32px 20px 64px; }
+    .eyebrow { margin: 0 0 8px; letter-spacing: 0.16em; text-transform: uppercase; font-size: 12px; color: var(--stamp); }
+    h1 { margin: 0; font: 600 42px/1.05 Georgia, "Iowan Old Style", serif; letter-spacing: -0.03em; }
+    h2 { margin: 0; font: 600 22px/1.2 Georgia, "Iowan Old Style", serif; }
+    .lede, .note { color: var(--muted); }
+    .lede strong, #base { color: var(--ink); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-top: 16px;
+    }
+    label { display: block; font-size: 13px; font-weight: 650; margin-bottom: 6px; }
+    input[type="password"], input[type="text"], input[type="search"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font: 16px/1.3 ui-monospace, "Cascadia Mono", Consolas, monospace;
+    }
+    button, .drop {
+      font: 600 15px/1 "Segoe UI", sans-serif;
+    }
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 16px;
+      background: var(--ink);
+      color: white;
+      cursor: pointer;
+    }
+    button.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+    button.danger { background: var(--danger); }
+    button:disabled { opacity: 0.55; cursor: wait; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .row > input { flex: 1; }
+    .check { display: flex; gap: 8px; align-items: center; font-weight: 500; margin: 12px 0; }
+    .drop {
+      display: grid;
+      place-items: center;
+      min-height: 148px;
+      border: 1.5px dashed #b7ab9b;
+      border-radius: 16px;
+      background: #fff;
+      text-align: center;
+      padding: 18px;
+      cursor: pointer;
+      position: relative;
+    }
+    .drop.hot { border-color: var(--stamp); background: #fff4ee; }
+    .drop strong { display: block; font-size: 18px; }
+    .picker {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+    .head { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    #status, #login-error { min-height: 1.4em; margin: 10px 0 0; }
+    #login-error { color: var(--danger); }
+    ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+    li.file {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: white;
+    }
+    li.file img, .badge {
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: #f3eee6;
+    }
+    .badge {
+      display: grid;
+      place-items: center;
+      font: 700 12px/1 ui-monospace, Consolas, monospace;
+      letter-spacing: 0.04em;
+    }
+    code { display: block; overflow-wrap: anywhere; font: 13px/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace; }
+    .meta { margin: 4px 0 8px; color: var(--muted); font-size: 13px; }
+    .actions, .rename { display: flex; flex-wrap: wrap; gap: 8px; }
+    .rename { margin-top: 8px; }
+    .rename input { font-size: 14px; padding: 8px 10px; }
+    .empty { color: var(--muted); padding: 8px 0; }
+    button:focus-visible, input:focus-visible, .drop:focus-within {
+      outline: 3px solid rgba(182, 64, 30, 0.35);
+      outline-offset: 2px;
+    }
+    @media (max-width: 640px) {
+      h1 { font-size: 34px; }
+      .head, .row { align-items: stretch; flex-direction: column; }
+      li.file { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">gservetech</p>
+    <h1>Asset storage</h1>
+    <p class="lede">Manage files at <strong id="base">this domain</strong>. They are saved on the server disk, not in the git project, so changing a file does not need a redeploy.</p>
+
+    <section class="card" id="login-view">
+      <form id="login-form">
+        <label for="password">Admin password</label>
+        <div class="row">
+          <input id="password" type="password" autocomplete="current-password" required>
+          <button type="button" class="ghost" id="toggle-password">Show</button>
+          <button type="submit">Sign in</button>
+        </div>
+        <p id="login-error" role="alert"></p>
+      </form>
+      <p class="note">Anyone with a file URL can view that file. The password only protects upload, replace, rename, and delete.</p>
+    </section>
+
+    <section id="app-view" hidden>
+      <div class="card">
+        <div class="head">
+          <h2>Upload</h2>
+          <button type="button" class="ghost" id="logout">Sign out</button>
+        </div>
+        <label for="directory">Folder</label>
+        <input id="directory" type="text" placeholder="brand or products/2026" autocomplete="off">
+        <label class="check"><input id="overwrite" type="checkbox"> Replace a file that already uses the same name</label>
+        <label class="drop" id="drop">
+          <input class="picker" id="picker" type="file" multiple accept="image/*,.svg,.pdf,.mp4,.webm,.mp3,.wav,.ogg,.woff,.woff2,.ttf,.otf,.css,.js,.json">
+          <span><strong>Drop files here</strong><span>or choose them from this computer</span></span>
+        </label>
+        <p id="status" role="status"></p>
+      </div>
+
+      <div class="card">
+        <div class="head">
+          <h2>Library</h2>
+          <button type="button" class="ghost" id="refresh">Refresh</button>
+        </div>
+        <label for="filter">Find</label>
+        <input id="filter" type="search" placeholder="logo.png" autocomplete="off">
+        <ul id="library"></ul>
+      </div>
+    </section>
+  </main>
+  <script>
+    const base = document.querySelector('#base')
+    const loginView = document.querySelector('#login-view')
+    const appView = document.querySelector('#app-view')
+    const loginForm = document.querySelector('#login-form')
+    const password = document.querySelector('#password')
+    const loginError = document.querySelector('#login-error')
+    const directoryInput = document.querySelector('#directory')
+    const overwriteInput = document.querySelector('#overwrite')
+    const picker = document.querySelector('#picker')
+    const drop = document.querySelector('#drop')
+    const status = document.querySelector('#status')
+    const library = document.querySelector('#library')
+    const filter = document.querySelector('#filter')
+    let files = []
+    let busy = false
+
+    document.querySelector('#toggle-password').addEventListener('click', () => {
+      const show = password.type === 'password'
+      password.type = show ? 'text' : 'password'
+      document.querySelector('#toggle-password').textContent = show ? 'Hide' : 'Show'
+    })
+
+    function publicPath(filePath) {
+      return '/' + filePath.split('/').map(encodeURIComponent).join('/')
+    }
+
+    function formatSize(size) {
+      if (size < 1024) return size + ' B'
+      if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB'
+      return (size / (1024 * 1024)).toFixed(1) + ' MB'
+    }
+
+    async function readJson(response) {
+      try { return await response.json() } catch { return null }
+    }
+
+    function showLogin() {
+      appView.hidden = true
+      loginView.hidden = false
+      library.replaceChildren()
+    }
+
+    function showApp() {
+      loginView.hidden = true
+      appView.hidden = false
+    }
+
+    async function loadSession() {
+      const response = await fetch('/api/session')
+      const body = await readJson(response)
+      if (body && body.publicBaseUrl) base.textContent = body.publicBaseUrl
+      if (body && body.authenticated) {
+        showApp()
+        await refresh()
+      } else {
+        showLogin()
+      }
+    }
+
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      loginError.textContent = ''
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ password: password.value }),
+        })
+        const body = await readJson(response)
+        if (!response.ok) {
+          loginError.textContent = (body && body.error) || 'Could not sign in'
+          return
+        }
+        password.value = ''
+        showApp()
+        await refresh()
+      } catch {
+        loginError.textContent = 'Could not reach the server.'
+      }
+    })
+
+    async function uploadOne(file, extra) {
+      const body = new FormData()
+      const directory = directoryInput.value.trim()
+      if (extra && extra.path) body.append('path', extra.path)
+      else if (directory) body.append('directory', directory)
+      if ((extra && extra.overwrite) || overwriteInput.checked) body.append('overwrite', 'true')
+      body.append('file', file, file.name)
+      const response = await fetch('/api/upload', { method: 'POST', body })
+      const payload = await readJson(response)
+      if (!response.ok) throw new Error((payload && payload.error) || 'Upload failed')
+      return payload.file
+    }
+
+    async function uploadFiles(list) {
+      if (busy) return
+      const chosen = [...list]
+      if (!chosen.length) return
+      busy = true
+      try {
+        for (let index = 0; index < chosen.length; index += 1) {
+          status.textContent = 'Uploading ' + (index + 1) + ' of ' + chosen.length + '…'
+          await uploadOne(chosen[index])
+        }
+        status.textContent = 'Saved. Copy a URL below and use it anywhere.'
+        picker.value = ''
+        await refresh()
+      } catch (error) {
+        status.textContent = error.message
+      } finally {
+        busy = false
+      }
+    }
+
+    picker.addEventListener('change', () => uploadFiles(picker.files))
+    ;['dragover', 'dragenter'].forEach((name) => drop.addEventListener(name, (event) => {
+      event.preventDefault()
+      drop.classList.add('hot')
+    }))
+    drop.addEventListener('dragleave', () => drop.classList.remove('hot'))
+    drop.addEventListener('drop', (event) => {
+      event.preventDefault()
+      drop.classList.remove('hot')
+      uploadFiles(event.dataTransfer.files)
+    })
+
+    async function copyText(value) {
+      try {
+        await navigator.clipboard.writeText(value)
+        return true
+      } catch {
+        try {
+          const area = document.createElement('textarea')
+          area.value = value
+          area.setAttribute('readonly', '')
+          document.body.appendChild(area)
+          area.select()
+          const ok = document.execCommand('copy')
+          area.remove()
+          return ok
+        } catch {
+          return false
+        }
+      }
+    }
+
+    function copyButton(label, value) {
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.className = 'ghost'
+      button.textContent = label
+      button.addEventListener('click', async () => {
+        const ok = await copyText(value)
+        status.textContent = ok ? 'Copied ' + value : 'Could not copy. Select the address and copy it manually.'
+        button.textContent = ok ? 'Copied' : label
+        setTimeout(() => { button.textContent = label }, 1200)
+      })
+      return button
+    }
+
+    function renderFile(file) {
+      const item = document.createElement('li')
+      item.className = 'file'
+      if (file.contentType && file.contentType.startsWith('image/')) {
+        const img = document.createElement('img')
+        img.alt = ''
+        img.src = publicPath(file.path)
+        item.appendChild(img)
+      } else {
+        const badge = document.createElement('span')
+        badge.className = 'badge'
+        const ext = file.path.includes('.') ? file.path.split('.').pop().toUpperCase() : 'FILE'
+        badge.textContent = ext.slice(0, 4)
+        item.appendChild(badge)
+      }
+      const body = document.createElement('div')
+      const code = document.createElement('code')
+      code.textContent = file.url
+      code.title = 'Copy URL'
+      code.style.cursor = 'pointer'
+      code.addEventListener('click', async () => {
+        const ok = await copyText(file.url)
+        status.textContent = ok ? 'Copied ' + file.url : 'Could not copy. Select the address and copy it manually.'
+      })
+      const meta = document.createElement('p')
+      meta.className = 'meta'
+      meta.textContent = file.path + ' · ' + formatSize(file.size)
+      const actions = document.createElement('div')
+      actions.className = 'actions'
+      actions.appendChild(copyButton('Copy URL', file.url))
+      actions.appendChild(copyButton('Copy path', publicPath(file.path)))
+      const openButton = document.createElement('button')
+      openButton.type = 'button'
+      openButton.className = 'ghost'
+      openButton.textContent = 'Open'
+      openButton.addEventListener('click', () => window.open(publicPath(file.path), '_blank', 'noopener'))
+      actions.appendChild(openButton)
+
+      const replace = document.createElement('button')
+      replace.type = 'button'
+      replace.className = 'ghost'
+      replace.textContent = 'Replace'
+      replace.addEventListener('click', () => {
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.addEventListener('change', async () => {
+          const next = input.files && input.files[0]
+          if (!next) return
+          status.textContent = 'Replacing ' + file.path + '…'
+          try {
+            await uploadOne(next, { path: file.path, overwrite: true })
+            status.textContent = 'Replaced ' + file.path + '. Browsers may keep the old copy until the cache expires.'
+            await refresh()
+          } catch (error) {
+            status.textContent = error.message
+          }
+        })
+        input.click()
+      })
+      actions.appendChild(replace)
+
+      const rename = document.createElement('button')
+      rename.type = 'button'
+      rename.className = 'ghost'
+      rename.textContent = 'Rename'
+      const renameRow = document.createElement('div')
+      renameRow.className = 'rename'
+      renameRow.hidden = true
+      const renameInput = document.createElement('input')
+      renameInput.type = 'text'
+      renameInput.value = file.path
+      renameInput.setAttribute('aria-label', 'New path')
+      const save = document.createElement('button')
+      save.type = 'button'
+      save.textContent = 'Save path'
+      save.addEventListener('click', async () => {
+        status.textContent = 'Renaming…'
+        const response = await fetch('/api/files/rename', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ from: file.path, to: renameInput.value.trim() }),
+        })
+        const payload = await readJson(response)
+        if (!response.ok) {
+          status.textContent = (payload && payload.error) || 'Rename failed'
+          return
+        }
+        status.textContent = 'New URL: ' + payload.file.url
+        await refresh()
+      })
+      renameRow.append(renameInput, save)
+      rename.addEventListener('click', () => { renameRow.hidden = !renameRow.hidden })
+      actions.appendChild(rename)
+
+      const remove = document.createElement('button')
+      remove.type = 'button'
+      remove.className = 'danger'
+      remove.textContent = 'Delete'
+      remove.addEventListener('click', async () => {
+        if (!confirm('Delete ' + file.path + '? The public URL will stop working.')) return
+        const response = await fetch('/api/files/' + file.path.split('/').map(encodeURIComponent).join('/'), { method: 'DELETE' })
+        const payload = await readJson(response)
+        if (!response.ok) {
+          status.textContent = (payload && payload.error) || 'Delete failed'
+          return
+        }
+        status.textContent = 'Deleted ' + file.path
+        await refresh()
+      })
+      actions.appendChild(remove)
+      body.append(code, meta, actions, renameRow)
+      item.appendChild(body)
+      return item
+    }
+
+    function renderLibrary() {
+      const query = filter.value.trim().toLowerCase()
+      const shown = files.filter((file) => !query || file.path.toLowerCase().includes(query) || file.url.toLowerCase().includes(query))
+      library.replaceChildren()
+      if (!shown.length) {
+        const empty = document.createElement('li')
+        empty.className = 'empty'
+        empty.textContent = files.length ? 'No files match that search.' : 'Nothing stored yet.'
+        library.appendChild(empty)
+        return
+      }
+      for (const file of shown) library.appendChild(renderFile(file))
+    }
+
+    async function refresh() {
+      const response = await fetch('/api/files')
+      const payload = await readJson(response)
+      if (response.status === 401) {
+        showLogin()
+        return
+      }
+      if (!response.ok || !payload || !payload.files) {
+        status.textContent = (payload && payload.error) || 'Could not load files.'
+        return
+      }
+      files = payload.files
+      renderLibrary()
+    }
+
+    filter.addEventListener('input', renderLibrary)
+    document.querySelector('#refresh').addEventListener('click', refresh)
+    document.querySelector('#logout').addEventListener('click', async () => {
+      await fetch('/api/logout', { method: 'POST' })
+      files = []
+      showLogin()
+    })
+
+    loadSession().catch(() => {
+      loginError.textContent = 'Could not reach the server.'
+    })
+  </script>
+</body>
+</html>

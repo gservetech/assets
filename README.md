@@ -45,7 +45,7 @@ Allowed types: jpg, png, gif, webp, avif, svg, ico, pdf, mp4, webm, mp3, wav, og
 The homepage is the admin screen:
 
 - **Upload** creates a file and returns its public URL.
-- **Library** lists what is stored.
+- **Gallery** shows stored images after you sign in. Logged-out visitors only see the sign-in form.
 - **Replace** updates the bytes at the same URL.
 - **Rename** moves a file to a new path. The old URL stops working.
 - **Delete** removes a file.

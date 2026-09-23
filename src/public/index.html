@@ -15,8 +15,6 @@
       --muted: #6f655c;
       --line: #d9d0c3;
       --stamp: #b6401e;
-      --stamp-ink: #fff7f2;
-      --ok: #1f6b45;
       --danger: #9d1c2b;
       --shadow: 0 16px 40px rgba(48, 32, 18, 0.06);
     }
@@ -32,7 +30,8 @@
     main { max-width: 1040px; margin: 0 auto; padding: 32px 20px 64px; }
     .eyebrow { margin: 0 0 8px; letter-spacing: 0.16em; text-transform: uppercase; font-size: 12px; color: var(--stamp); }
     h1 { margin: 0; font: 600 42px/1.05 Georgia, "Iowan Old Style", serif; letter-spacing: -0.03em; }
-    h2 { margin: 0; font: 600 22px/1.2 Georgia, "Iowan Old Style", serif; }
+    h2, h3 { margin: 0; font: 600 22px/1.2 Georgia, "Iowan Old Style", serif; }
+    h3 { font-size: 18px; margin-top: 22px; }
     .lede, .note { color: var(--muted); }
     .lede strong, #base { color: var(--ink); }
     .card {
@@ -53,9 +52,7 @@
       padding: 12px 14px;
       font: 16px/1.3 ui-monospace, "Cascadia Mono", Consolas, monospace;
     }
-    button, .drop {
-      font: 600 15px/1 "Segoe UI", sans-serif;
-    }
+    button, .drop { font: 600 15px/1 "Segoe UI", sans-serif; }
     button {
       border: 0;
       border-radius: 999px;
@@ -94,6 +91,44 @@
     .head { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
     #status, #login-error { min-height: 1.4em; margin: 10px 0 0; }
     #login-error { color: var(--danger); }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .tile {
+      position: relative;
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #f3eee6;
+      cursor: zoom-in;
+    }
+    .tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .tile span {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 28px 10px 8px;
+      background: linear-gradient(transparent, rgba(28, 23, 18, 0.78));
+      color: white;
+      font: 12px/1.3 ui-monospace, Consolas, monospace;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
     li.file {
       display: grid;
@@ -104,32 +139,45 @@
       border-radius: 14px;
       background: white;
     }
-    li.file img, .badge {
+    .badge {
       width: 72px;
       height: 72px;
       border-radius: 10px;
-      object-fit: cover;
-      background: #f3eee6;
-    }
-    .badge {
       display: grid;
       place-items: center;
+      background: #f3eee6;
       font: 700 12px/1 ui-monospace, Consolas, monospace;
-      letter-spacing: 0.04em;
     }
     code { display: block; overflow-wrap: anywhere; font: 13px/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace; }
     .meta { margin: 4px 0 8px; color: var(--muted); font-size: 13px; }
     .actions, .rename { display: flex; flex-wrap: wrap; gap: 8px; }
     .rename { margin-top: 8px; }
     .rename input { font-size: 14px; padding: 8px 10px; }
-    .empty { color: var(--muted); padding: 8px 0; }
-    button:focus-visible, input:focus-visible, .drop:focus-within {
+    .empty { color: var(--muted); padding: 8px 0; margin: 0; }
+    dialog {
+      width: min(920px, calc(100vw - 32px));
+      border: 0;
+      border-radius: 18px;
+      padding: 16px;
+      background: var(--card);
+      color: var(--ink);
+    }
+    dialog::backdrop { background: rgba(28, 23, 18, 0.72); }
+    .viewer-image {
+      width: 100%;
+      max-height: 68vh;
+      object-fit: contain;
+      background: #1c1712;
+      border-radius: 12px;
+    }
+    button:focus-visible, input:focus-visible, .drop:focus-within, .tile:focus-visible {
       outline: 3px solid rgba(182, 64, 30, 0.35);
       outline-offset: 2px;
     }
     @media (max-width: 640px) {
       h1 { font-size: 34px; }
       .head, .row { align-items: stretch; flex-direction: column; }
+      .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       li.file { grid-template-columns: 1fr; }
     }
   </style>
@@ -138,7 +186,7 @@
   <main>
     <p class="eyebrow">gservetech</p>
     <h1>Asset storage</h1>
-    <p class="lede">Manage files at <strong id="base">this domain</strong>. They are saved on the server disk, not in the git project, so changing a file does not need a redeploy.</p>
+    <p class="lede" id="intro">Sign in to open the image gallery for <strong id="base">this domain</strong>.</p>
 
     <section class="card" id="login-view">
       <form id="login-form">
@@ -150,7 +198,7 @@
         </div>
         <p id="login-error" role="alert"></p>
       </form>
-      <p class="note">Anyone with a file URL can view that file. The password only protects upload, replace, rename, and delete.</p>
+      <p class="note">The gallery stays hidden until this sign-in succeeds.</p>
     </section>
 
     <section id="app-view" hidden>
@@ -171,15 +219,28 @@
 
       <div class="card">
         <div class="head">
-          <h2>Library</h2>
+          <h2>Gallery</h2>
           <button type="button" class="ghost" id="refresh">Refresh</button>
         </div>
         <label for="filter">Find</label>
         <input id="filter" type="search" placeholder="logo.png" autocomplete="off">
+        <div id="gallery" class="gallery"></div>
+        <h3 id="other-heading" hidden>Other files</h3>
         <ul id="library"></ul>
       </div>
     </section>
   </main>
+
+  <dialog id="viewer" aria-label="Image preview">
+    <img id="viewer-image" class="viewer-image" alt="">
+    <p id="viewer-meta" class="meta"></p>
+    <code id="viewer-url"></code>
+    <div id="viewer-actions" class="actions"></div>
+    <div class="actions" style="margin-top: 12px">
+      <button type="button" class="ghost" id="viewer-close">Close</button>
+    </div>
+  </dialog>
+
   <script>
     const base = document.querySelector('#base')
     const loginView = document.querySelector('#login-view')
@@ -192,8 +253,15 @@
     const picker = document.querySelector('#picker')
     const drop = document.querySelector('#drop')
     const status = document.querySelector('#status')
+    const gallery = document.querySelector('#gallery')
     const library = document.querySelector('#library')
+    const otherHeading = document.querySelector('#other-heading')
     const filter = document.querySelector('#filter')
+    const viewer = document.querySelector('#viewer')
+    const viewerImage = document.querySelector('#viewer-image')
+    const viewerMeta = document.querySelector('#viewer-meta')
+    const viewerUrl = document.querySelector('#viewer-url')
+    const viewerActions = document.querySelector('#viewer-actions')
     let files = []
     let busy = false
 
@@ -213,14 +281,28 @@
       return (size / (1024 * 1024)).toFixed(1) + ' MB'
     }
 
+    function isImage(file) {
+      return Boolean(file.contentType && file.contentType.startsWith('image/'))
+    }
+
     async function readJson(response) {
       try { return await response.json() } catch { return null }
     }
 
+    function closeViewer() {
+      viewerImage.removeAttribute('src')
+      viewerActions.replaceChildren()
+      if (viewer.open) viewer.close()
+    }
+
     function showLogin() {
+      closeViewer()
       appView.hidden = true
       loginView.hidden = false
+      gallery.replaceChildren()
       library.replaceChildren()
+      otherHeading.hidden = true
+      files = []
     }
 
     function showApp() {
@@ -285,7 +367,7 @@
           status.textContent = 'Uploading ' + (index + 1) + ' of ' + chosen.length + '…'
           await uploadOne(chosen[index])
         }
-        status.textContent = 'Saved. Copy a URL below and use it anywhere.'
+        status.textContent = 'Saved. It is in the gallery below.'
         picker.value = ''
         await refresh()
       } catch (error) {
@@ -341,43 +423,11 @@
       return button
     }
 
-    function renderFile(file) {
-      const item = document.createElement('li')
-      item.className = 'file'
-      if (file.contentType && file.contentType.startsWith('image/')) {
-        const img = document.createElement('img')
-        img.alt = ''
-        img.src = publicPath(file.path)
-        item.appendChild(img)
-      } else {
-        const badge = document.createElement('span')
-        badge.className = 'badge'
-        const ext = file.path.includes('.') ? file.path.split('.').pop().toUpperCase() : 'FILE'
-        badge.textContent = ext.slice(0, 4)
-        item.appendChild(badge)
-      }
-      const body = document.createElement('div')
-      const code = document.createElement('code')
-      code.textContent = file.url
-      code.title = 'Copy URL'
-      code.style.cursor = 'pointer'
-      code.addEventListener('click', async () => {
-        const ok = await copyText(file.url)
-        status.textContent = ok ? 'Copied ' + file.url : 'Could not copy. Select the address and copy it manually.'
-      })
-      const meta = document.createElement('p')
-      meta.className = 'meta'
-      meta.textContent = file.path + ' · ' + formatSize(file.size)
+    function fileActions(file) {
       const actions = document.createElement('div')
       actions.className = 'actions'
       actions.appendChild(copyButton('Copy URL', file.url))
       actions.appendChild(copyButton('Copy path', publicPath(file.path)))
-      const openButton = document.createElement('button')
-      openButton.type = 'button'
-      openButton.className = 'ghost'
-      openButton.textContent = 'Open'
-      openButton.addEventListener('click', () => window.open(publicPath(file.path), '_blank', 'noopener'))
-      actions.appendChild(openButton)
 
       const replace = document.createElement('button')
       replace.type = 'button'
@@ -393,6 +443,7 @@
           try {
             await uploadOne(next, { path: file.path, overwrite: true })
             status.textContent = 'Replaced ' + file.path + '. Browsers may keep the old copy until the cache expires.'
+            closeViewer()
             await refresh()
           } catch (error) {
             status.textContent = error.message
@@ -429,11 +480,16 @@
           return
         }
         status.textContent = 'New URL: ' + payload.file.url
+        closeViewer()
         await refresh()
       })
       renameRow.append(renameInput, save)
-      rename.addEventListener('click', () => { renameRow.hidden = !renameRow.hidden })
+      rename.addEventListener('click', () => {
+        renameRow.hidden = !renameRow.hidden
+        if (!renameRow.hidden) renameInput.focus()
+      })
       actions.appendChild(rename)
+      actions.appendChild(renameRow)
 
       const remove = document.createElement('button')
       remove.type = 'button'
@@ -448,26 +504,71 @@
           return
         }
         status.textContent = 'Deleted ' + file.path
+        closeViewer()
         await refresh()
       })
       actions.appendChild(remove)
-      body.append(code, meta, actions, renameRow)
-      item.appendChild(body)
+      return actions
+    }
+
+    function openViewer(file) {
+      viewerImage.src = publicPath(file.path)
+      viewerImage.alt = file.path
+      viewerMeta.textContent = file.path + ' · ' + formatSize(file.size)
+      viewerUrl.textContent = file.url
+      viewerActions.replaceChildren(fileActions(file))
+      if (!viewer.open) viewer.showModal()
+    }
+
+    function renderTile(file) {
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.className = 'tile'
+      const img = document.createElement('img')
+      img.alt = file.path
+      img.src = publicPath(file.path)
+      const caption = document.createElement('span')
+      caption.textContent = file.path
+      button.append(img, caption)
+      button.addEventListener('click', () => openViewer(file))
+      return button
+    }
+
+    function renderFile(file) {
+      const item = document.createElement('li')
+      item.className = 'file'
+      const badge = document.createElement('span')
+      badge.className = 'badge'
+      const ext = file.path.includes('.') ? file.path.split('.').pop().toUpperCase() : 'FILE'
+      badge.textContent = ext.slice(0, 4)
+      const body = document.createElement('div')
+      const code = document.createElement('code')
+      code.textContent = file.url
+      const meta = document.createElement('p')
+      meta.className = 'meta'
+      meta.textContent = file.path + ' · ' + formatSize(file.size)
+      body.append(code, meta, fileActions(file))
+      item.append(badge, body)
       return item
     }
 
     function renderLibrary() {
       const query = filter.value.trim().toLowerCase()
       const shown = files.filter((file) => !query || file.path.toLowerCase().includes(query) || file.url.toLowerCase().includes(query))
+      const images = shown.filter(isImage)
+      const others = shown.filter((file) => !isImage(file))
+      gallery.replaceChildren()
       library.replaceChildren()
-      if (!shown.length) {
-        const empty = document.createElement('li')
+      if (!images.length) {
+        const empty = document.createElement('p')
         empty.className = 'empty'
-        empty.textContent = files.length ? 'No files match that search.' : 'Nothing stored yet.'
-        library.appendChild(empty)
-        return
+        empty.textContent = files.some(isImage) ? 'No images match that search.' : 'No images yet.'
+        gallery.appendChild(empty)
+      } else {
+        for (const file of images) gallery.appendChild(renderTile(file))
       }
-      for (const file of shown) library.appendChild(renderFile(file))
+      otherHeading.hidden = others.length === 0
+      for (const file of others) library.appendChild(renderFile(file))
     }
 
     async function refresh() {
@@ -478,18 +579,23 @@
         return
       }
       if (!response.ok || !payload || !payload.files) {
-        status.textContent = (payload && payload.error) || 'Could not load files.'
+        status.textContent = (payload && payload.error) || 'Could not load the gallery.'
         return
       }
       files = payload.files
       renderLibrary()
     }
 
+    document.querySelector('#viewer-close').addEventListener('click', closeViewer)
+    viewerUrl.addEventListener('click', async () => {
+      const ok = await copyText(viewerUrl.textContent)
+      status.textContent = ok ? 'Copied ' + viewerUrl.textContent : 'Could not copy. Select the address and copy it manually.'
+    })
+
     filter.addEventListener('input', renderLibrary)
     document.querySelector('#refresh').addEventListener('click', refresh)
     document.querySelector('#logout').addEventListener('click', async () => {
       await fetch('/api/logout', { method: 'POST' })
-      files = []
       showLogin()
     })
 

@@ -46,6 +46,7 @@ The homepage is the admin screen:
 
 - **Upload** creates a file and returns its public URL.
 - **Gallery** shows stored images after you sign in. Logged-out visitors only see the sign-in form.
+- **Search by saved name** filters the gallery by the file name that was stored, such as `logo.png`.
 - **Replace** updates the bytes at the same URL.
 - **Rename** moves a file to a new path. The old URL stops working.
 - **Delete** removes a file.

@@ -56,6 +56,7 @@ test('homepage is the password-protected manager', async () => {
   assert.match(response.body.toString(), /id="gallery"/)
   assert.match(response.body.toString(), /id="app-view" hidden/)
   assert.match(response.body.toString(), /id="library"/)
+  assert.match(response.body.toString(), /Search by saved name/)
   assert.match(response.body.toString(), /Copy URL/)
   assert.match(response.body.toString(), /Copy path/)
 })
@@ -126,7 +127,14 @@ test('library, rename, replace, and delete require the admin session', async () 
 
   const listed = await request('GET', '/api/files', { headers: { cookie } })
   assert.equal(listed.status, 200)
-  assert.ok(listed.json.files.some((file) => file.url === 'https://assets.gservetech.com/my-photos/A-B.png'))
+  assert.ok(listed.json.files.some((file) => file.name === 'A-B.png' && file.url === 'https://assets.gservetech.com/my-photos/A-B.png'))
+
+  const byName = await request('GET', '/api/files?name=a-b', { headers: { cookie } })
+  assert.equal(byName.status, 200)
+  assert.deepEqual(byName.json.files.map((file) => file.name), ['A-B.png'])
+  const missed = await request('GET', '/api/files?name=missing-name', { headers: { cookie } })
+  assert.equal(missed.status, 200)
+  assert.equal(missed.json.files.length, 0)
 
   const renamed = await request('POST', '/api/files/rename', {
     headers: { cookie, 'content-type': 'application/json' },

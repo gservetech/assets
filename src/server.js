@@ -298,9 +298,14 @@ async function handleList(req, res) {
   const url = new URL(req.url || '/', 'http://127.0.0.1')
   const requested = url.searchParams.get('prefix')
   const prefix = requested && requested.trim() ? sanitizeDirectory(requested) : ''
+  const nameQuery = (url.searchParams.get('name') || '').trim().toLowerCase()
   const files = []
   await walk(config.storageDir, '', files)
-  const filtered = files.filter((file) => !prefix || file.path === prefix || file.path.startsWith(`${prefix}/`))
+  const filtered = files.filter((file) => {
+    if (prefix && file.path !== prefix && !file.path.startsWith(`${prefix}/`)) return false
+    if (nameQuery && !file.name.toLowerCase().includes(nameQuery)) return false
+    return true
+  })
   filtered.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : a.updatedAt > b.updatedAt ? -1 : 0))
   sendJson(res, 200, {
     ok: true,
@@ -335,13 +340,7 @@ async function walk(dir, prefix, out) {
       continue
     }
     const info = await stat(full)
-    out.push({
-      path: key.rel,
-      url: publicUrl(key.rel),
-      size: info.size,
-      contentType: CONTENT_TYPES[key.ext],
-      updatedAt: info.mtime.toISOString(),
-    })
+    out.push(describeFile(key.rel, key.ext, info))
     if (out.length >= 2000) return
   }
 }
@@ -514,6 +513,7 @@ async function publish(tmpPath, rel, ext, overwrite) {
 function describeFile(rel, ext, info) {
   return {
     path: rel,
+    name: rel.split('/').pop(),
     url: publicUrl(rel),
     size: info.size,
     contentType: CONTENT_TYPES[ext],

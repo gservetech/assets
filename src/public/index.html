@@ -222,8 +222,9 @@
           <h2>Gallery</h2>
           <button type="button" class="ghost" id="refresh">Refresh</button>
         </div>
-        <label for="filter">Find</label>
-        <input id="filter" type="search" placeholder="logo.png" autocomplete="off">
+        <label for="filter">Search by saved name</label>
+        <input id="filter" type="search" placeholder="logo.png" autocomplete="off" enterkeyhint="search">
+        <p id="search-note" class="empty"></p>
         <div id="gallery" class="gallery"></div>
         <h3 id="other-heading" hidden>Other files</h3>
         <ul id="library"></ul>
@@ -257,6 +258,7 @@
     const library = document.querySelector('#library')
     const otherHeading = document.querySelector('#other-heading')
     const filter = document.querySelector('#filter')
+    const searchNote = document.querySelector('#search-note')
     const viewer = document.querySelector('#viewer')
     const viewerImage = document.querySelector('#viewer-image')
     const viewerMeta = document.querySelector('#viewer-meta')
@@ -285,6 +287,12 @@
       return Boolean(file.contentType && file.contentType.startsWith('image/'))
     }
 
+    function savedName(file) {
+      if (file.name) return file.name
+      const parts = String(file.path || '').split('/')
+      return parts[parts.length - 1] || ''
+    }
+
     async function readJson(response) {
       try { return await response.json() } catch { return null }
     }
@@ -301,6 +309,8 @@
       loginView.hidden = false
       gallery.replaceChildren()
       library.replaceChildren()
+      searchNote.textContent = ''
+      filter.value = ''
       otherHeading.hidden = true
       files = []
     }
@@ -514,7 +524,7 @@
     function openViewer(file) {
       viewerImage.src = publicPath(file.path)
       viewerImage.alt = file.path
-      viewerMeta.textContent = file.path + ' · ' + formatSize(file.size)
+      viewerMeta.textContent = savedName(file) + ' · ' + file.path + ' · ' + formatSize(file.size)
       viewerUrl.textContent = file.url
       viewerActions.replaceChildren(fileActions(file))
       if (!viewer.open) viewer.showModal()
@@ -525,10 +535,10 @@
       button.type = 'button'
       button.className = 'tile'
       const img = document.createElement('img')
-      img.alt = file.path
+      img.alt = savedName(file)
       img.src = publicPath(file.path)
       const caption = document.createElement('span')
-      caption.textContent = file.path
+      caption.textContent = savedName(file)
       button.append(img, caption)
       button.addEventListener('click', () => openViewer(file))
       return button
@@ -546,7 +556,7 @@
       code.textContent = file.url
       const meta = document.createElement('p')
       meta.className = 'meta'
-      meta.textContent = file.path + ' · ' + formatSize(file.size)
+      meta.textContent = savedName(file) + ' · ' + file.path + ' · ' + formatSize(file.size)
       body.append(code, meta, fileActions(file))
       item.append(badge, body)
       return item
@@ -554,15 +564,16 @@
 
     function renderLibrary() {
       const query = filter.value.trim().toLowerCase()
-      const shown = files.filter((file) => !query || file.path.toLowerCase().includes(query) || file.url.toLowerCase().includes(query))
+      const shown = files.filter((file) => !query || savedName(file).toLowerCase().includes(query))
       const images = shown.filter(isImage)
       const others = shown.filter((file) => !isImage(file))
       gallery.replaceChildren()
       library.replaceChildren()
+      searchNote.textContent = query ? shown.length + ' match ' + query : ''
       if (!images.length) {
         const empty = document.createElement('p')
         empty.className = 'empty'
-        empty.textContent = files.some(isImage) ? 'No images match that search.' : 'No images yet.'
+        empty.textContent = query ? 'No saved name matches that search.' : 'No images yet.'
         gallery.appendChild(empty)
       } else {
         for (const file of images) gallery.appendChild(renderTile(file))
